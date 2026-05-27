@@ -1,11 +1,55 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>my site</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Study Buddy - õppimise nipid ja kogukond">
+    <title>a202</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <!-- Link viitab kompileeritud väljundfailile -->
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Hi</h1>
-    <p>Мой домен .eu работает на GitHub Pages</p>
+    <header class="site-header">
+        <div class="logo-container">
+            <img src="logo.svg" alt="a202 logo" class="logo-img" width="40" height="40">
+            <h1>a202</h1>
+        </div>
+        <nav class="main-nav" aria-label="Põhinavigatsioon">
+            <ul>
+                <li><a href="#intro">Avaleht</a></li>
+                <li><a href="#tips">Nipid</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section id="intro" class="section intro-section">
+            <div class="container">
+                <h2>Hi there</h2>
+                <p class="intro-text">My name is...</p>
+                
+            </div>
+        </section>
+
+        <section id="tips" class="section tips-section">
+            <div class="container">
+                <h2>Choose</h2>
+                <ul class="tips-grid">
+					<li><a href="videopoker.html">Poker</a></li>
+					<li><a href="21.html">21</a></li>
+                </ul>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="site-footer">
+        <p>© <span id="current-year">2026</span> a202 | Kõik õigused kaitstud</p>
+    </footer>
+
+    <script>
+        document.getElementById('current-year').textContent = new Date().getFullYear()
+    </script>
 </body>
 </html>

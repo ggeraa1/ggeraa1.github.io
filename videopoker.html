@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Видеопокер</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #0d5c00, #1a1a1a);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .container {
+            max-width: 900px;
+            width: 100%;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            font-size: 2.8rem;
+            margin-top: 10px;
+            margin-bottom: 5px;
+            color: #ffde59;
+            text-shadow: 0 0 10px rgba(255, 222, 89, 0.5);
+            letter-spacing: 2px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            font-size: 1.2rem;
+            margin-bottom: 25px;
+            color: #ccc;
+        }
+        
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            padding: 15px 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        }
+        
+        .info-box {
+            text-align: center;
+        }
+        
+        .info-title {
+            font-size: 1rem;
+            color: #aaa;
+            margin-bottom: 5px;
+        }
+        
+        .info-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #ffde59;
+        }
+        
+        .cards-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            width: 140px;
+            height: 200px;
+            background-color: white;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.7);
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.8);
+        }
+        
+        .card.held {
+            box-shadow: 0 0 15px #ffde59;
+        }
+        
+        .card-top, .card-bottom {
+            font-size: 2.2rem;
+            font-weight: bold;
+        }
+        
+        .card-bottom {
+            transform: rotate(180deg);
+        }
+        
+        .card-center {
+            font-size: 4rem;
+            text-align: center;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .hold-btn {
+            position: absolute;
+            bottom: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #ffde59;
+            color: #000;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .hold-btn:hover {
+            background-color: #ffc800;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        button {
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        #deal-btn {
+            background-color: #2e7d32;
+            color: white;
+        }
+        
+        #deal-btn:hover:not(:disabled) {
+            background-color: #1b5e20;
+        }
+        
+        #draw-btn {
+            background-color: #1565c0;
+            color: white;
+        }
+        
+        #draw-btn:hover:not(:disabled) {
+            background-color: #0d47a1;
+        }
+        
+        button:disabled {
+            background-color: #666;
+            color: #999;
+            cursor: not-allowed;
+        }
+        
+        .results {
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        }
+        
+        #result-text {
+            font-size: 1.8rem;
+            text-align: center;
+            margin-bottom: 15px;
+            color: #ffde59;
+            min-height: 50px;
+        }
+        
+        .combinations {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+        }
+        
+        .combination {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .combination.active {
+            background-color: rgba(255, 222, 89, 0.2);
+            border: 1px solid #ffde59;
+        }
+        
+        .combination-name {
+            color: #ddd;
+        }
+        
+        .combination-payout {
+            color: #ffde59;
+            font-weight: bold;
+        }
+        
+        .instructions {
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        
+        .instructions h3 {
+            margin-top: 0;
+            color: #ffde59;
+        }
+        
+        @media (max-width: 768px) {
+            .cards-container {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 15px;
+            }
+            
+            .card {
+                width: 120px;
+                height: 170px;
+            }
+            
+            .card-center {
+                font-size: 3.2rem;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            button {
+                width: 80%;
+            }
+        }
+        
+        /* Масти карт */
+        .heart, .diamond {
+            color: #e53935;
+        }
+        
+        .club, .spade {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ВИДЕОПОКЕР</h1>
+        <div class="subtitle">Пять карт — одна удача!</div>
+        
+        <div class="game-info">
+            <div class="info-box">
+                <div class="info-title">БАЛАНС</div>
+                <div id="balance" class="info-value">1000</div>
+            </div>
+            <div class="info-box">
+                <div class="info-title">СТАВКА</div>
+                <div id="bet" class="info-value">10</div>
+            </div>
+            <div class="info-box">
+                <div class="info-title">ВЫИГРЫШ</div>
+                <div id="win" class="info-value">0</div>
+            </div>
+        </div>
+        
+        <div class="cards-container" id="cards-container">
+            <!-- Карты будут добавлены через JavaScript -->
+        </div>
+        
+        <div class="controls">
+            <button id="deal-btn" onclick="deal()">РАЗДАТЬ</button>
+            <button id="draw-btn" onclick="draw()" disabled>ЗАМЕНИТЬ КАРТЫ</button>
+        </div>
+        
+        <div class="results">
+            <div id="result-text"></div>
+            <div class="combinations" id="combinations">
+                <!-- Комбинации будут добавлены через JavaScript -->
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h3>Правила игры:</h3>
+            <p>1. Нажмите "РАЗДАТЬ", чтобы получить 5 карт.</p>
+            <p>2. Выберите карты, которые хотите оставить, нажав кнопку "УДЕРЖАТЬ" под ними.</p>
+            <p>3. Нажмите "ЗАМЕНИТЬ КАРТЫ", чтобы заменить неудержанные карты.</p>
+            <p>4. Выигрыш зависит от комбинации карт и вашей ставки.</p>
+            <p>5. Для следующей игры снова нажмите "РАЗДАТЬ".</p>
+        </div>
+    </div>
+
+    <script>
+        // Игровые переменные
+        let balance = 1000;
+        let currentBet = 10;
+        let currentWin = 0;
+        let deck = [];
+        let hand = [];
+        let heldCards = [];
+        let gamePhase = 'bet'; // bet, deal, draw
+        
+        // Масти и достоинства карт
+        const suits = ['heart', 'diamond', 'club', 'spade'];
+        const suitSymbols = {
+            'heart': '♥',
+            'diamond': '♦',
+            'club': '♣',
+            'spade': '♠'
+        };
+        const ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+        
+        // Выплаты за комбинации
+        const payouts = [
+            { name: 'Роял-флеш', payout: 250, description: 'Туз, король, дама, валет, десять одной масти' },
+            { name: 'Стрит-флеш', payout: 50, description: 'Пять карт одной масти по порядку' },
+            { name: 'Каре', payout: 25, description: 'Четыре карты одного достоинства' },
+            { name: 'Фулл-хаус', payout: 9, description: 'Три карты одного достоинства и две другого' },
+            { name: 'Флеш', payout: 6, description: 'Пять карт одной масти' },
+            { name: 'Стрит', payout: 4, description: 'Пять карт по порядку' },
+            { name: 'Тройка', payout: 3, description: 'Три карты одного достоинства' },
+            { name: 'Две пары', payout: 2, description: 'Две пары карт одного достоинства' },
+            { name: 'Пара валетов или выше', payout: 1, description: 'Два валета, дамы, короля или туза' }
+        ];
+        
+        // Инициализация игры
+        function initGame() {
+            updateDisplay();
+            createPayoutTable();
+        }
+        
+        // Создание таблицы выплат
+        function createPayoutTable() {
+            const container = document.getElementById('combinations');
+            container.innerHTML = '';
+            
+            payouts.forEach(payout => {
+                const div = document.createElement('div');
+                div.className = 'combination';
+                div.innerHTML = `
+                    <div class="combination-name">${payout.name}</div>
+                    <div class="combination-payout">${payout.payout} к 1</div>
+                `;
+                container.appendChild(div);
+            });
+        }
+        
+        // Обновление отображения
+        function updateDisplay() {
+            document.getElementById('balance').textContent = balance;
+            document.getElementById('bet').textContent = currentBet;
+            document.getElementById('win').textContent = currentWin;
+            
+            // Обновление состояния кнопок
+            document.getElementById('deal-btn').disabled = gamePhase === 'deal' || balance < currentBet;
+            document.getElementById('draw-btn').disabled = gamePhase !== 'deal';
+        }
+        
+        // Создание колоды
+        function createDeck() {
+            deck = [];
+            for (let suit of suits) {
+                for (let rank of ranks) {
+                    deck.push({ suit, rank });
+                }
+            }
+            shuffleDeck();
+        }
+        
+        // Перетасовка колоды
+        function shuffleDeck() {
+            for (let i = deck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [deck[i], deck[j]] = [deck[j], deck[i]];
+            }
+        }
+        
+        // Раздача карт
+        function deal() {
+            // Проверяем, достаточно ли средств
+            if (balance < currentBet) {
+                setResultText('Недостаточно средств!');
+                return;
+            }
+            
+            // Снимаем ставку с баланса
+            balance -= currentBet;
+            currentWin = 0;
+            heldCards = [];
+            
+            // Создаем новую колоду и раздаем карты
+            createDeck();
+            hand = deck.slice(0, 5);
+            
+            // Переходим в фазу замены карт
+            gamePhase = 'deal';
+            
+            // Отображаем карты
+            displayCards();
+            
+            // Обновляем отображение
+            updateDisplay();
+            setResultText('Выберите карты для удержания');
+        }
+        
+        // Замена карт
+        function draw() {
+            if (gamePhase !== 'deal') return;
+            
+            // Заменяем карты, которые не удержаны
+            let cardsToReplace = 5 - heldCards.length;
+            
+            if (cardsToReplace > 0) {
+                // Убираем неудержанные карты из руки
+                for (let i = 0; i < 5; i++) {
+                    if (!heldCards.includes(i)) {
+                        hand[i] = deck.pop();
+                    }
+                }
+            }
+            
+            // Отображаем обновленную руку
+            displayCards();
+            
+            // Определяем комбинацию и выплату
+            evaluateHand();
+            
+            // Переходим в фазу ставок
+            gamePhase = 'bet';
+            updateDisplay();
+        }
+        
+        // Отображение карт
+        function displayCards() {
+            const container = document.getElementById('cards-container');
+            container.innerHTML = '';
+            
+            hand.forEach((card, index) => {
+                const cardDiv = document.createElement('div');
+                cardDiv.className = `card ${card.suit}`;
+                if (heldCards.includes(index)) {
+                    cardDiv.classList.add('held');
+                }
+                
+                cardDiv.innerHTML = `
+                    <div class="card-top">${card.rank}<br>${suitSymbols[card.suit]}</div>
+                    <div class="card-center">${suitSymbols[card.suit]}</div>
+                    <div class="card-bottom">${card.rank}<br>${suitSymbols[card.suit]}</div>
+                    <button class="hold-btn" onclick="toggleHold(${index})" ${gamePhase !== 'deal' ? 'disabled' : ''}>
+                        ${heldCards.includes(index) ? 'УДЕРЖАНО' : 'УДЕРЖАТЬ'}
+                    </button>
+                `;
+                
+                container.appendChild(cardDiv);
+            });
+        }
+        
+        // Удержание/отпускание карты
+        function toggleHold(index) {
+            if (gamePhase !== 'deal') return;
+            
+            if (heldCards.includes(index)) {
+                heldCards = heldCards.filter(i => i !== index);
+            } else {
+                heldCards.push(index);
+            }
+            
+            displayCards();
+        }
+        
+        // Оценка комбинации и определение выигрыша
+        function evaluateHand() {
+            // Сортируем карты для удобства оценки
+            const sortedHand = [...hand].sort((a, b) => {
+                return ranks.indexOf(a.rank) - ranks.indexOf(b.rank);
+            });
+            
+            // Проверяем комбинации от самой сильной к самой слабой
+            if (isRoyalFlush(sortedHand)) {
+                awardWin(payouts[0]);
+            } else if (isStraightFlush(sortedHand)) {
+                awardWin(payouts[1]);
+            } else if (isFourOfAKind(sortedHand)) {
+                awardWin(payouts[2]);
+            } else if (isFullHouse(sortedHand)) {
+                awardWin(payouts[3]);
+            } else if (isFlush(sortedHand)) {
+                awardWin(payouts[4]);
+            } else if (isStraight(sortedHand)) {
+                awardWin(payouts[5]);
+            } else if (isThreeOfAKind(sortedHand)) {
+                awardWin(payouts[6]);
+            } else if (isTwoPairs(sortedHand)) {
+                awardWin(payouts[7]);
+            } else if (isJacksOrBetter(sortedHand)) {
+                awardWin(payouts[8]);
+            } else {
+                setResultText('Нет выигрышной комбинации');
+            }
+        }
+        
+        // Выплата выигрыша
+        function awardWin(payout) {
+            const winAmount = currentBet * payout.payout;
+            currentWin = winAmount;
+            balance += winAmount;
+            
+            setResultText(`${payout.name}! Вы выиграли ${winAmount}`);
+            highlightCombination(payout.name);
+        }
+        
+        // Подсветка выигравшей комбинации
+        function highlightCombination(combinationName) {
+            const allCombinations = document.querySelectorAll('.combination');
+            allCombinations.forEach(comb => {
+                comb.classList.remove('active');
+                
+                const nameElement = comb.querySelector('.combination-name');
+                if (nameElement && nameElement.textContent === combinationName) {
+                    comb.classList.add('active');
+                }
+            });
+        }
+        
+        // Установка текста результата
+        function setResultText(text) {
+            document.getElementById('result-text').textContent = text;
+        }
+        
+        // Проверка на Роял-флеш
+        function isRoyalFlush(hand) {
+            // Все карты одной масти и от 10 до туза
+            const royalRanks = ['10', 'J', 'Q', 'K', 'A'];
+            const suit = hand[0].suit;
+            
+            return hand.every(card => card.suit === suit) && 
+                   hand.every(card => royalRanks.includes(card.rank));
+        }
+        
+        // Проверка на Стрит-флеш
+        function isStraightFlush(hand) {
+            return isFlush(hand) && isStraight(hand);
+        }
+        
+        // Проверка на Каре
+        function isFourOfAKind(hand) {
+            const rankCount = {};
+            hand.forEach(card => {
+                rankCount[card.rank] = (rankCount[card.rank] || 0) + 1;
+            });
+            
+            return Object.values(rankCount).includes(4);
+        }
+        
+        // Проверка на Фулл-хаус
+        function isFullHouse(hand) {
+            const rankCount = {};
+            hand.forEach(card => {
+                rankCount[card.rank] = (rankCount[card.rank] || 0) + 1;
+            });
+            
+            const values = Object.values(rankCount);
+            return values.includes(3) && values.includes(2);
+        }
+        
+        // Проверка на Флеш
+        function isFlush(hand) {
+            const suit = hand[0].suit;
+            return hand.every(card => card.suit === suit);
+        }
+        
+        // Проверка на Стрит
+        function isStraight(hand) {
+            // Получаем индексы рангов
+            const rankIndices = hand.map(card => ranks.indexOf(card.rank)).sort((a, b) => a - b);
+            
+            // Проверяем, являются ли индексы последовательными
+            for (let i = 1; i < rankIndices.length; i++) {
+                if (rankIndices[i] !== rankIndices[i-1] + 1) {
+                    // Особый случай: туз как 1 (для A,2,3,4,5)
+                    if (rankIndices.includes(12) && rankIndices[0] === 0 && rankIndices[1] === 1 && 
+                        rankIndices[2] === 2 && rankIndices[3] === 3 && rankIndices[4] === 12) {
+                        return true;
+                    }
+                    return false;
+                }
+            }
+            return true;
+        }
+        
+        // Проверка на Тройку
+        function isThreeOfAKind(hand) {
+            const rankCount = {};
+            hand.forEach(card => {
+                rankCount[card.rank] = (rankCount[card.rank] || 0) + 1;
+            });
+            
+            return Object.values(rankCount).includes(3) && !Object.values(rankCount).includes(2);
+        }
+        
+        // Проверка на Две пары
+        function isTwoPairs(hand) {
+            const rankCount = {};
+            hand.forEach(card => {
+                rankCount[card.rank] = (rankCount[card.rank] || 0) + 1;
+            });
+            
+            const pairs = Object.values(rankCount).filter(count => count === 2);
+            return pairs.length === 2;
+        }
+        
+        // Проверка на Пару валетов или выше
+        function isJacksOrBetter(hand) {
+            const rankCount = {};
+            hand.forEach(card => {
+                rankCount[card.rank] = (rankCount[card.rank] || 0) + 1;
+            });
+            
+            // Ищем пару валетов, дам, королей или тузов
+            const highRanks = ['J', 'Q', 'K', 'A'];
+            for (let rank in rankCount) {
+                if (rankCount[rank] === 2 && highRanks.includes(rank)) {
+                    return true;
+                }
+            }
+            
+            return false;
+        }
+        
+        // Инициализация при загрузке страницы
+        window.onload = initGame;
+    </script>
+</body>
+</html>
